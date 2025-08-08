@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Route Planner</title>
+    <style>
+        body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+}
+
+
+
+.location-map {
+    width: 80%;
+    height: 200px;
+    background-color: #f2f2f2;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    position: relative;
+    left: 10%;
+}
+
+.destination {
+    margin-bottom: 20px;
+    font-size: 10px;
+    font-style:initial;
+}
+
+.destination label {
+    display: block;
+    margin-bottom: 10px;
+    
+}
+
+.destination input[type="text"] {
+    width: 50%;
+    height: 30px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    position: relative;
+    left: 23%;
+}
+
+.route-options {
+    margin-bottom: 20px;
+    
+}
+
+.route-option{
+    display: flex;
+    align-items: center;
+    gap: 17%;
+}
+.r{
+    width: 70px;
+    height: 35px;
+    border-radius: 30px;
+    position: relative;
+    left: 25%;
+    background-color: rgb(187, 182, 182);
+    border-color:rgb(187, 182, 182) ;
+    border: none;
+    margin-bottom: 0;
+    margin-top: 15px;
+}
+.TOLL{
+    display: flex;
+    gap: 30%;
+    position: relative;
+    left:24% ;
+    gap: 15%;
+    margin-top: 0;
+}
+
+.traffic-gradient {
+    background-color: #507ae3;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    
+    
+}
+.TRAFFIC{
+    position: relative;
+    left: 23%;
+    display: flex;
+    gap: 13.5%;
+    margin-top: 5px;
+}
+
+
+.report-accident {
+    background-color: #f05a43;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 80%;
+    position: relative;
+    left:10%;
+}
+
+.bot-suggestion {
+    background-color: #f3f3b9;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-top: 20px;
+    width: 80%;
+    position: relative;
+    left:10%;
+}
+</style>
+</head>
+<body>
+    <div >
+        <h1 style="text-align: center;">Get Your Location</h1>
+        <div class="location-map">
+        <img style="width: 100%; left: 0%;" class="location-map" src="image copy 2.png" >
+        </div>
+        <div class="destination">
+            <h1 for="destination" style="text-align: center;">Choose Your Destination</h1>
+            <input type="text" id="destination" placeholder="Enter Destination">
+        </div>
+        <div class="route-options">
+            <h2 style="text-align: center;">Route Options</h2>
+            <div class="route">
+            <div class="route-option">
+                <button class="r">R1</button>
+                <button class="r" >R2</button>
+                <button class="r" >R3</button>
+                
+            
+            </div>
+            <div class="TOLL">
+                <p>35 km(FREE)</p>
+                <p>32 km (TOLL)</p>
+                <p>46 km(FREE)</p>
+            </div>
+            <div class="TRAFFIC">
+                <button class="traffic-gradient">Traffic Gradient</button>
+                <button class="traffic-gradient">Traffic Gradient</button>
+                <button class="traffic-gradient">Traffic Gradient</button>
+            </div>
+            </div>
+        </div>
+        <button class="report-accident">Report Accident in Route</button>
+        <div class="bot-suggestion">
+            <p>BOT Suggestion: Go with R2 (Toll), Turn Left</p>
+        </div>
+    </div>
+</body>
+</html>
