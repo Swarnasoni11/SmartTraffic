@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Traffic System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('tra.png') center/cover no-repeat;
+      filter: blur(8px);
+      z-index: -1;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 30px 25px;
+      border: 2px solid #000;
+      width: 400px;
+      text-align: center;
+      border-radius: 12px;
+      box-shadow: 0 4px 25px rgba(0, 0, 0, 0.2);
+    }
+    .symbol {
+      width: 90px;
+      height: 90px;
+      border: 2px solid black;
+      border-radius: 50%;
+      margin: 0 auto 15px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      background: white;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 25px;
+    }
+
+    .login-icon {
+      width: 60px;
+      height: 60px;
+      border: 2px solid black;
+      border-radius: 50%;
+      margin: 0 auto 10px auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 26px;
+      margin-bottom: 15px;
+      background: white;
+    }
+
+    .disclaimer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 12px 0;
+      font-size: 15px;
+      font-weight: bold;
+    }
+
+    .disclaimer span {
+      font-size: 20px;
+      margin-right: 6px;
+      color: #cc0000;
+    }
+
+    p {
+      margin: 6px 0;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 85%;
+      padding: 10px;
+      margin: 7px 0;
+      border: 1px solid black;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .btn {
+      display: block;
+      width: 85%;
+      padding: 10px;
+      margin: 12px auto;
+      border: 1px solid black;
+      background: #f8f8f8;
+      cursor: pointer;
+      font-weight: bold;
+      border-radius: 6px;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="symbol">Symbol</div>
+    <h1>Smart Traffic System</h1>
+
+    <div class="login-icon">👤</div>
+    <div class="disclaimer"><span>⚠</span> Disclaimer</div>
+    <p>ONLY FOR AUTHORISED PEOPLE</p>
+
+    <input type="text" placeholder="USER ID">
+    <input type="password" placeholder="Password">
+
+    <button class="btn">Operator Sign Up</button>
+    <button class="btn">Govt. Auth. Sign Up</button>
+  </div>
+
+</body>
+</html>
