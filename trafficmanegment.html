@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Smart Parking System</title>
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --muted:#9aa6b2;
+    --accent:#00c2a8;
+    --danger:#ff6b6b;
+    --occupied:#ef4444;
+    --free:#10b981;
+    --reserved:#f59e0b;
+    --glass: rgba(255,255,255,0.04);
+    --glass-2: rgba(255,255,255,0.02);
+    --radius:14px;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 400px at 10% 10%, rgba(0,194,168,0.06), transparent 10%),
+      linear-gradient(180deg, var(--bg), #08101a 60%);
+    color:#e6eef6;
+    padding:28px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  header{
+    display:flex;
+    gap:18px;
+    align-items:center;
+    margin-bottom:20px;
+  }
+  .brand{
+    display:flex;
+    gap:12px;
+    align-items:center;
+  }
+  .logo{
+    width:48px;
+    height:48px;
+    border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),#0ea5b7);
+    display:grid;
+    place-items:center;
+    font-weight:700;
+    color:#012;
+    box-shadow: 0 6px 20px rgba(2,6,23,0.6), inset 0 -6px 18px rgba(255,255,255,0.06);
+  }
+  h1{font-size:20px;margin:0}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+
+  .toolbar{
+    margin-left:auto;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .btn{
+    background:var(--glass);
+    border:1px solid rgba(255,255,255,0.04);
+    padding:8px 12px;
+    border-radius:10px;
+    color:var(--muted);
+    font-weight:600;
+    cursor:pointer;
+    transition:all .16s ease;
+    display:inline-flex;
+    gap:8px;
+    align-items:center;
+  }
+  .btn:hover{transform:translateY(-3px); color: #fff}
+  .btn.primary{
+    background: linear-gradient(90deg,var(--accent),#06b6d4);
+    color:#012;
+    border:0;
+    box-shadow:0 8px 30px rgba(2,6,23,0.55);
+  }
+
+  main{
+    display:grid;
+    grid-template-columns: 340px 1fr;
+    gap:22px;
+    margin-top:18px;
+  }
+  .panel{
+    background: linear-gradient(180deg,var(--card), rgba(255,255,255,0.02));
+    border-radius: var(--radius);
+    padding:18px;
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+  }
+  .stats{display:grid;gap:10px}
+  .stat{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    border-radius:12px;
+    background:var(--glass-2);
+  }
+  .stat .big{font-size:20px; font-weight:700}
+  .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .legend .item{
+    display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.02);
+    color:var(--muted);font-size:13px;
+  }
+  .dot{
+    width:12px;height:12px;border-radius:4px;flex:0 0 12px;
+  }
+  .dot.free{background:var(--free)}
+  .dot.occupied{background:var(--occupied)}
+  .dot.reserved{background:var(--reserved)}
+
+  .controls{display:flex;gap:8px;margin-top:12px}
+  .controls input[type="number"]{
+    width:100%;padding:8px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);
+    background:transparent;color:inherit;font-weight:600;
+  }
+  .grid-wrap{
+    display:flex;flex-direction:column;gap:14px;
+  }
+  .grid-top{display:flex;justify-content:space-between;align-items:center}
+  .parking-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap:14px;
+    margin-top:12px;
+  }
+  .slot{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;align-items:center;
+    transition:transform .12s ease, box-shadow .12s ease;
+    border:1px solid rgba(255,255,255,0.03);
+  }
+  .slot:hover{transform:translateY(-6px); box-shadow: 0 18px 45px rgba(2,6,23,0.6)}
+  .plate{
+    width:100%;display:flex;justify-content:space-between;align-items:center;
+    gap:8px;
+  }
+  .slot-id{font-weight:700;font-size:14px}
+  .status{
+    padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px;
+  }
+  .status.free{background:rgba(16,185,129,0.12);color:var(--free)}
+  .status.occupied{background:rgba(239,68,68,0.12);color:var(--occupied)}
+  .status.reserved{background:rgba(245,158,11,0.12);color:var(--reserved)}
+
+  .slot-visual{
+    width:100%;height:70px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    color:rgba(255,255,255,0.85);font-weight:700;font-size:14px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border:1px dashed rgba(255,255,255,0.03)
+  }
+  .slot-actions{display:flex;gap:8px;width:100%}
+  .slot .small-btn{
+    flex:1;padding:8px;border-radius:10px;border:0;background:rgba(255,255,255,0.03);color:var(--muted);font-weight:700;cursor:pointer;
+  }
+  .slot .small-btn.positive{background:rgba(16,185,129,0.12);color:var(--free)}
+  .slot .small-btn.warn{background:rgba(245,158,11,0.12);color:var(--reserved)}
+  .slot .small-btn.danger{background:rgba(239,68,68,0.12);color:var(--occupied)}
+
+  footer{margin-top:20px;color:var(--muted);font-size:13px;text-align:center}
+  .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:none;place-items:center}
+  .modal{width:420px;background:linear-gradient(180deg,#05121a,#071827);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .modal h3{margin:0 0 6px 0}
+  .modal .row{display:flex;gap:8px;margin-top:12px}
+  .modal label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+  .modal input{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit;font-weight:700}
+  .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+  @media (max-width:920px){
+    main{grid-template-columns:1fr; padding-bottom:40px}
+    .toolbar{flex-wrap:wrap}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="logo">SP</div>
+    <div>
+      <h1>Smart Parking </h1>
+      <p class="lead">Real-time slot Map • Booking</p>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" id="simulateBtn" title="Start/Stop simulation">Start Simulation</button>
+    <button class="btn" id="resetBtn" title="Reset to friendly defaults">Reset</button>
+    <button class="btn primary" id="addSlotsBtn">Add Slot</button>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <strong>Parking Garage — Level 1</strong><br>
+        <small style="color:var(--muted)">Sensor prototype view</small>
+      </div>
+      <div style="text-align:right;color:var(--muted)"><small>Updated: <span id="updatedAt">—</span></small></div>
+    </div>
+
+    <div style="margin-top:16px" class="stats">
+      <div class="stat">
+        <div>
+          <div style="color:var(--muted)">Total Slots</div>
+          <div class="big" id="totalSlots">0</div>
+        </div>
+        <div style="text-align:right">
+          <div style="color:var(--muted)">Available</div>
+          <div class="big" id="availableSlots">0</div>
+        </div>
+      </div>
+
+      <div class="stat">
+        <div>
+          <div style="color:var(--muted)">Reserved</div>
+          <div class="big" id="reservedSlots">0</div>
+        </div>
+        <div style="text-align:right">
+          <div style="color:var(--muted)">Occupied</div>
+          <div class="big" id="occupiedSlots">0</div>
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="item"><span class="dot free"></span> Free</div>
+        <div class="item"><span class="dot reserved"></span> Reserved</div>
+        <div class="item"><span class="dot occupied"></span> Occupied</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="color:var(--muted);font-size:13px;margin-bottom:8px">Controls</div>
+        <div class="controls">
+          <input type="number" id="slotCountInput" min="1" placeholder="Number of slots (e.g. 12)">
+          <button class="btn" id="applySlotsBtn">Apply</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="color:var(--muted);font-size:13px;margin-bottom:8px">Quick Actions</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="freeAllBtn">Free All</button>
+          <button class="btn" id="occupyRandomBtn">Occupy Random</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel grid-wrap">
+    <div class="grid-top">
+      <div>
+        <strong>Parking Map</strong><br>
+        <small style="color:var(--muted)">Click a slot to reserve / release.</small>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <label style="color:var(--muted);font-weight:700;margin-right:6px">Filter:</label>
+        <select id="filterSelect" class="btn">
+          <option value="all">All</option>
+          <option value="free">Free</option>
+          <option value="reserved">Reserved</option>
+          <option value="occupied">Occupied</option>
+        </select>
+      </div>
+    </div>
+    <div class="parking-grid" id="parkingGrid" aria-live="polite">
+    </div>
+
+    <footer>
+      Prototype — no backend. State stored in your browser (localStorage). Designed for demos & UI testing.
+    </footer>
+  </section>
+</main>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal" role="document">
+    <h3 id="modalTitle">Reserve Slot</h3>
+    <div id="modalBody">
+      <label for="nameInput">Driver name</label>
+      <input id="nameInput" placeholder="e.g. Rahul Sharma" />
+      <div class="row">
+        <div style="flex:1">
+          <label for="plateInput">Number plate</label>
+          <input id="plateInput" placeholder="e.g. MH12AB1234" />
+        </div>
+        <div style="width:120px">
+          <label for="minutesInput">Minutes</label>
+          <input id="minutesInput" type="number" min="5" value="30" />
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="modalCancel">Cancel</button>
+        <button class="btn primary" id="modalConfirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/*
+  Smart Parking Prototype logic
+  - slots stored in localStorage under key 'sp_slots_v1'
+  - each slot: { id, status: 'free'|'occupied'|'reserved', plate, name, reservedUntil (timestamp or null) }
+*/
+(() => {
+  const STORAGE_KEY = 'sp_slots_v1';
+  const DEFAULT_COUNT = 12;
+
+  // DOM refs
+  const parkingGrid = document.getElementById('parkingGrid');
+  const totalSlotsEl = document.getElementById('totalSlots');
+  const availableSlotsEl = document.getElementById('availableSlots');
+  const reservedSlotsEl = document.getElementById('reservedSlots');
+  const occupiedSlotsEl = document.getElementById('occupiedSlots');
+  const updatedAtEl = document.getElementById('updatedAt');
+  const slotCountInput = document.getElementById('slotCountInput');
+  const applySlotsBtn = document.getElementById('applySlotsBtn');
+  const freeAllBtn = document.getElementById('freeAllBtn');
+  const occupyRandomBtn = document.getElementById('occupyRandomBtn');
+  const filterSelect = document.getElementById('filterSelect');
+  const simulateBtn = document.getElementById('simulateBtn');
+  const addSlotsBtn = document.getElementById('addSlotsBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const modalBackdrop = document.getElementById('modalBackdrop');
+  const modalTitle = document.getElementById('modalTitle');
+  const nameInput = document.getElementById('nameInput');
+  const plateInput = document.getElementById('plateInput');
+  const minutesInput = document.getElementById('minutesInput');
+  const modalCancel = document.getElementById('modalCancel');
+  const modalConfirm = document.getElementById('modalConfirm');
+
+  let slots = [];
+  let currentBookingSlot = null;
+  let simulateInterval = null;
+
+  // utilities
+  function nowTs(){ return Date.now() }
+  function save(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(slots)); updateUI(); }
+  function load(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return null;
+    try { return JSON.parse(raw) } catch(e){ return null }
+  }
+
+  function makeSlots(count){
+    const arr = [];
+    for(let i=1;i<=count;i++){
+      arr.push({ id: i, status: 'free', plate: null, name: null, reservedUntil: null });
+    }
+    return arr;
+  }
+
+  function ensureSlots(){
+    const loaded = load();
+    if(loaded && Array.isArray(loaded) && loaded.length>0){
+      slots = loaded;
+    } else {
+      slots = makeSlots(DEFAULT_COUNT);
+      save();
+    }
+  }
+
+  function updateUI(){
+    // expire reservations
+    const now = nowTs();
+    slots.forEach(s => {
+      if(s.status === 'reserved' && s.reservedUntil && s.reservedUntil <= now){
+        s.status = 'occupied'; // simulate car arrived after reservation expires
+        s.reservedUntil = null;
+      }
+    });
+
+    // counters
+    const total = slots.length;
+    const free = slots.filter(s => s.status === 'free').length;
+    const reserved = slots.filter(s => s.status === 'reserved').length;
+    const occupied = slots.filter(s => s.status === 'occupied').length;
+
+    totalSlotsEl.textContent = total;
+    availableSlotsEl.textContent = free;
+    reservedSlotsEl.textContent = reserved;
+    occupiedSlotsEl.textContent = occupied;
+    updatedAtEl.textContent = new Date().toLocaleString();
+
+    // render grid with filter
+    const filter = filterSelect.value;
+    parkingGrid.innerHTML = '';
+    const toShow = slots.filter(s => filter === 'all' ? true : s.status === filter);
+
+    toShow.forEach(s => {
+      const el = document.createElement('div');
+      el.className = 'slot';
+      el.setAttribute('data-id', s.id);
+
+      const plate = document.createElement('div');
+      plate.className = 'plate';
+      plate.innerHTML = `<div class="slot-id">Slot ${s.id}</div>
+        <div class="status ${s.status}">${s.status.toUpperCase()}</div>`;
+
+      const visual = document.createElement('div');
+      visual.className = 'slot-visual';
+      visual.textContent = s.status === 'free' ? '🅿️ FREE' : (s.status === 'reserved' ? '🔒 RESERVED' : '🚗 OCCUPIED');
+
+      const actions = document.createElement('div');
+      actions.className = 'slot-actions';
+
+      // action buttons vary by state
+      if(s.status === 'free'){
+        const btnReserve = document.createElement('button');
+        btnReserve.className = 'small-btn positive';
+        btnReserve.textContent = 'Reserve';
+        btnReserve.onclick = () => openReserveModal(s.id);
+        actions.appendChild(btnReserve);
+
+        const btnFakeOcc = document.createElement('button');
+        btnFakeOcc.className = 'small-btn danger';
+        btnFakeOcc.textContent = 'Mark Occupied';
+        btnFakeOcc.onclick = () => { s.status = 'occupied'; s.plate = 'UNKNOWN'; save(); };
+        actions.appendChild(btnFakeOcc);
+      } else if(s.status === 'reserved'){
+        const btnCancel = document.createElement('button');
+        btnCancel.className = 'small-btn';
+        btnCancel.textContent = 'Cancel';
+        btnCancel.onclick = () => {
+          s.status = 'free'; s.reservedUntil = null; s.plate = null; s.name = null; save();
+        };
+        const btnArrive = document.createElement('button');
+        btnArrive.className = 'small-btn positive';
+        btnArrive.textContent = 'Arrived';
+        btnArrive.onclick = () => { s.status = 'occupied'; s.reservedUntil = null; save(); };
+
+        actions.appendChild(btnCancel);
+        actions.appendChild(btnArrive);
+      } else { // occupied
+        const btnFree = document.createElement('button');
+        btnFree.className = 'small-btn';
+        btnFree.textContent = 'Free';
+        btnFree.onclick = () => { s.status = 'free'; s.plate = null; s.name = null; save(); };
+        actions.appendChild(btnFree);
+      }
+
+      el.appendChild(plate);
+      el.appendChild(visual);
+      el.appendChild(actions);
+      parkingGrid.appendChild(el);
+    });
+  }
+
+  function openReserveModal(slotId){
+    currentBookingSlot = slots.find(s => s.id === slotId);
+    if(!currentBookingSlot) return;
+    modalTitle.textContent = `Reserve Slot ${currentBookingSlot.id}`;
+    nameInput.value = '';
+    plateInput.value = '';
+    minutesInput.value = 30;
+    modalBackdrop.style.display = 'grid';
+    modalBackdrop.setAttribute('aria-hidden','false');
+  }
+
+  function closeModal(){
+    modalBackdrop.style.display = 'none';
+    modalBackdrop.setAttribute('aria-hidden','true');
+    currentBookingSlot = null;
+  }
+
+  // actions
+  applySlotsBtn.addEventListener('click', () => {
+    const n = parseInt(slotCountInput.value,10);
+    if(!n || n < 1){ alert('Enter a valid number of slots (>=1).'); return; }
+    slots = makeSlots(n);
+    save();
+  });
+
+  freeAllBtn.addEventListener('click', () => {
+    slots.forEach(s => { s.status = 'free'; s.plate = null; s.name = null; s.reservedUntil = null; });
+    save();
+  });
+
+  occupyRandomBtn.addEventListener('click', () => {
+    // mark roughly 30% occupied
+    slots.forEach(s => s.status = 'free');
+    const take = Math.max(1, Math.floor(slots.length * 0.3));
+    const shuffled = [...slots].sort(() => Math.random()-0.5).slice(0,take);
+    shuffled.forEach(s => { s.status = 'occupied'; s.plate = `XX${Math.floor(Math.random()*9000)+1000}`; });
+    save();
+  });
+
+  filterSelect.addEventListener('change', updateUI);
+
+  simulateBtn.addEventListener('click', () => {
+    if(simulateInterval){
+      clearInterval(simulateInterval); simulateInterval = null;
+      simulateBtn.textContent = 'Start Simulation';
+    } else {
+      simulateBtn.textContent = 'Stop Simulation';
+      simulateInterval = setInterval(simulateSensors, 2500);
+    }
+  });
+
+  addSlotsBtn.addEventListener('click', () => {
+    const nextId = slots.length + 1;
+    slots.push({ id: nextId, status: 'free', plate: null, name: null, reservedUntil: null });
+    save();
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if(confirm('Reset prototype? This clears all state.')) {
+      slots = makeSlots(DEFAULT_COUNT);
+      save();
+    }
+  });
+
+  modalCancel.addEventListener('click', closeModal);
+  modalBackdrop.addEventListener('click', (e)=> {
+    if(e.target === modalBackdrop) closeModal();
+  });
+
+  modalConfirm.addEventListener('click', () => {
+    const name = nameInput.value.trim() || 'Guest';
+    const plate = plateInput.value.trim() || null;
+    const minutes = Math.max(1, parseInt(minutesInput.value,10) || 30);
+    if(!currentBookingSlot) return;
+    currentBookingSlot.status = 'reserved';
+    currentBookingSlot.name = name;
+    currentBookingSlot.plate = plate;
+    currentBookingSlot.reservedUntil = nowTs() + minutes * 60 * 1000; // expiration
+    save();
+    closeModal();
+  });
+  function simulateSensors(){
+    const changes = Math.max(1, Math.floor(slots.length * 0.08));
+    for(let i=0;i<changes;i++){
+      const s = slots[Math.floor(Math.random()*slots.length)];
+      if(s.status === 'reserved') continue;
+      const r = Math.random();
+      if(r < 0.25) s.status = 'occupied';
+      else if(r < 0.4) s.status = 'free';
+    }
+    save();
+  }
+  ensureSlots();
+  updateUI();
+  window.sp = {
+    getSlots: ()=>slots,
+    reset: ()=>{ slots = makeSlots(DEFAULT_COUNT); save(); },
+    save
+  };
+})();
+</script>
+</body>
+</html>
